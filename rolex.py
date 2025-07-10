@@ -1,7 +1,5 @@
 import streamlit as st
 import requests
-import speech_recognition as sr
-import pyttsx3
 
 # ✅ Your API Key (keep private)
 OPENROUTER_API_KEY = "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"
@@ -16,7 +14,7 @@ def ask_openrouter(question):
     data = {
         "model": "mistralai/mistral-7b-instruct",
         "messages": [
-            {"role": "system", "content": "You are Rolex, an intelligent, confident and deeply knowledgeable AI assistant with a strong masculine personality. Always reply to the user's question like a professional assistant."},
+            {"role": "system", "content": "You are Rolex, a confident and deeply knowledgeable AI assistant with a strong masculine personality. You always reply like a professional assistant."},
             {"role": "user", "content": question}
         ]
     }
@@ -31,31 +29,6 @@ def ask_openrouter(question):
             return "Unexpected API response."
     except Exception as e:
         return f"Error: {str(e)}"
-
-# 🎤 Mic input
-def listen_to_mic():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("🎤 Listening...")
-        audio = r.listen(source)
-    try:
-        return r.recognize_google(audio)
-    except sr.UnknownValueError:
-        return "Sorry, I couldn't understand you."
-    except sr.RequestError:
-        return "Network error."
-
-# 🔊 Voice output (deep male)
-def speak(text):
-    engine = pyttsx3.init()
-    engine.setProperty("rate", 135)
-    voices = engine.getProperty('voices')
-    for voice in voices:
-        if "david" in voice.name.lower() or "mark" in voice.name.lower() or "male" in voice.name.lower():
-            engine.setProperty('voice', voice.id)
-            break
-    engine.say(text)
-    engine.runAndWait()
 
 # 🌐 Streamlit UI Config
 st.set_page_config(page_title="Rolex AI", page_icon="🤖", layout="centered")
@@ -98,29 +71,16 @@ st.markdown("""
 
 # 🧠 Header
 st.markdown("<h1>🤖 Rolex - Your Personal AI Assistant</h1>", unsafe_allow_html=True)
-st.markdown("<h2>Speak. Ask. Command.</h2>", unsafe_allow_html=True)
+st.markdown("<h2>Text-based Streamlit Version</h2>", unsafe_allow_html=True)
 
-# 🎛 Input selection
-mode = st.radio("Choose input method:", ["🎤 Voice", "⌨️ Text"], horizontal=True)
+# ⌨️ Text input only
+user_input = st.text_input("Type your question:")
 
-if mode == "🎤 Voice":
-    if st.button("🎙 Start Listening"):
-        user_input = listen_to_mic()
-        st.text_area("🧏 You said:", user_input, height=80)
-        if user_input.strip():
-            with st.spinner("🧠 Thinking..."):
-                answer = ask_openrouter(user_input)
-            st.success(answer)
-            speak(answer)
-
-elif mode == "⌨️ Text":
-    user_input = st.text_input("Type your question:")
-    if st.button("💬 Get Answer"):
-        if user_input.strip():
-            with st.spinner("🧠 Thinking..."):
-                answer = ask_openrouter(user_input)
-            st.success(answer)
-            speak(answer)
+if st.button("💬 Get Answer"):
+    if user_input.strip():
+        with st.spinner("🧠 Rolex is thinking..."):
+            answer = ask_openrouter(user_input)
+        st.success(answer)
 
 # 📎 Footer
 st.markdown("""
